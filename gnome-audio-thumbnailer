@@ -1,0 +1,49 @@
+#!/usr/bin/python3
+
+import os, subprocess, argparse, json
+
+parser = argparse.ArgumentParser(description="Gnome Audio Thumbnailer")
+parser.add_argument('-i', '--input')
+parser.add_argument('-o', '--output')
+parser.add_argument('-s', '--size', default = 128)
+parser.add_argument('--install', action='store_true')
+
+args = parser.parse_args()
+
+if args.install:
+
+	dest = '/usr/share/thumbnailers/z-audio.thumbnailer'
+	print(os.path.basename(__file__), "Writing thumbnailer '%s'" % (dest) )
+
+	with open(dest, 'w') as fd:
+		fd.write("[Thumbnailer Entry]\n")
+		# fd.write("TryExec=%s\n" % ( os.path.basename(__file__) ))
+		
+		fd.write("Exec=")
+		fd.write( os.path.basename(__file__) )
+		fd.write(" -i %i -o %o -s %s\n")
+		
+		fd.write("MimeType=audio/mpeg\n")
+ 
+elif args.output:
+
+	command = [ 
+		'ffmpeg', 
+		'-hide_banner', 
+		'-loglevel', 'error',
+		'-i', args.input, 
+		'-an', 
+		'-filter:v', 'scale=%d:-1' % ( int(args.size) ),
+		'-y', 
+		args.output 
+	]
+	
+	subprocess.run( command )
+
+else:
+	parser.print_usage()
+
+
+
+
+
